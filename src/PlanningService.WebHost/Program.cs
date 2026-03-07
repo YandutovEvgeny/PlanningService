@@ -1,4 +1,5 @@
 using PlanningService.Infrastructure.Extensions;
+using PlanningService.WebHost.Exceptions;
 using PlanningService.WebHost.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,9 @@ builder.Services.AddPlanningServiceDbContext(options =>
 
 builder.Logging.AddConsole();
 builder.Services.AddControllers();
+
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ExceptionHandler>();
 
 var app = builder.Build();
 
