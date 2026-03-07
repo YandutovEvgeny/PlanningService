@@ -12,12 +12,12 @@ public class PlannerController : ControllerBase
     [HttpGet]
     public Task<ModelDto> GetPlanningModel([FromQuery] ModelQuery query)
     {
-
+        throw new NotImplementedException();
     }
 
     [HttpPatch]
     public Task UpdatePlanningModel([FromBody] UpdatePlanningDto dto)
     {
-
+        throw new NotImplementedException();
     }
 }
