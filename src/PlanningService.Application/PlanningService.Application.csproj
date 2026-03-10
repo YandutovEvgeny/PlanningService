@@ -10,4 +10,9 @@
     <ProjectReference Include="..\PlanningService.Infrastructure\PlanningService.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Rules\Total\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>
