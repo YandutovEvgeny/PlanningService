@@ -3,7 +3,7 @@ using PlanningService.Application.Interfaces;
 using PlanningService.Application.Models;
 using ValueType = PlanningService.Application.Contracts.Planner.Enums.ValueType;
 
-namespace PlanningService.Application.Rules.SkuSub.Growth;
+namespace PlanningService.Application.Rules.SkuSub.Amount;
 
 public class SkuSubAmountGrowthRule : IFormulaRule
 {

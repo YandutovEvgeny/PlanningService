@@ -16,6 +16,6 @@ public class SkuPriceHistoryY0Rule : IFormulaRule
 
         skuNode.PriceHistory = skuNode.UnitsHistory > 0
             ? skuNode.AmountHistory / skuNode.UnitsHistory
-            : 0;
+            : default;
     }
 }

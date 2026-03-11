@@ -13,7 +13,7 @@ public static class PlanningServiceDbContextExtensions
             .Configure(configure)
             .ValidateOnStart();
         
-        services.AddDbContext<PlanningServiceDbContext>((sp, options) =>
+        services.AddDbContext<PlanningDbContext>((sp, options) =>
         {
             var dbContextOptions = sp.GetRequiredService<IOptions<PlanningServiceDbContextOptions>>();
 

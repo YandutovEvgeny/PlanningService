@@ -1,5 +1,6 @@
 using PlanningService.Infrastructure.Extensions;
 using PlanningService.WebHost.Exceptions;
+using PlanningService.WebHost.Extensions;
 using PlanningService.WebHost.Extensions.Configuration;
 using System.Text.Json.Serialization;
 
@@ -26,6 +27,8 @@ builder.Services.AddControllers()
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ExceptionHandler>();
+
+builder.Services.AddCustomServices();
 
 var app = builder.Build();
 

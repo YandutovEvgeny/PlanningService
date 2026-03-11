@@ -4,18 +4,18 @@ using PlanningService.Infrastructure.Configurations;
 
 namespace PlanningService.Infrastructure;
 
-public class PlanningServiceDbContext : DbContext
+public class PlanningDbContext : DbContext
 {
     public DbSet<Sku> Skus { get; set; }
     public DbSet<SkuSub> SkuSubs { get; set; }
     public DbSet<HistoryY0> HistoryY0Members { get; set; }
     public DbSet<PlanningY1> PlanningY1Members { get; set; }
 
-    public PlanningServiceDbContext()
+    public PlanningDbContext()
     {
     }
 
-    public PlanningServiceDbContext(DbContextOptions<PlanningServiceDbContext> options) : base(options)
+    public PlanningDbContext(DbContextOptions<PlanningDbContext> options) : base(options)
     {
     }
 
