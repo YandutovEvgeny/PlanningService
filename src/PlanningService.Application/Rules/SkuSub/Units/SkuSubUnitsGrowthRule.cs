@@ -17,6 +17,8 @@ public class SkuSubUnitsGrowthRule : IFormulaRule
         var parent = skuSubNode.ParentNode;
         if (parent is null) return;
 
-        skuSubNode.UnitsGrowth = (skuSubNode.UnitsPlanning - skuSubNode.UnitsHistory) / parent.UnitsHistory;
+        skuSubNode.UnitsGrowth = parent.UnitsHistory > 0
+            ? (skuSubNode.UnitsPlanning - skuSubNode.UnitsHistory) / parent.UnitsHistory
+            : default;
     }
 }

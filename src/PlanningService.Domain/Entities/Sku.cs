@@ -4,22 +4,21 @@ using System.Diagnostics.CodeAnalysis;
 namespace PlanningService.Domain.Entities;
 
 /// <summary>
-/// Represents the SKU table.<br/>
-/// Grouping entity.
+/// Represents the SKU table.
 /// </summary>
-[Table("SKU")]
+[Table("skus")]
 public class Sku : EntityBase
 {
     /// <summary>
     /// Represents unique identifire of SKU.
     /// </summary>
-    [Column("SKUId")]
+    [Column("sku_id")]
     public override Guid Id { get; set; }
 
     /// <summary>
     /// Represents the name of SKU.
     /// </summary>
-    [Column("SKUName")]
+    [Column("sku_name")]
     public string Name { get; set; } = string.Empty;
 
     /// <summary>

@@ -14,6 +14,8 @@ public class TotalAmountGrowthRule : IFormulaRule
     {
         var totalNode = (TotalNode)node;
 
-        totalNode.AmountGrowth = (totalNode.AmountPlanning - totalNode.AmountHistory) / totalNode.AmountHistory;
+        totalNode.AmountGrowth = totalNode.AmountHistory > 0
+            ? (totalNode.AmountPlanning - totalNode.AmountHistory) / totalNode.AmountHistory
+            : default;
     }
 }

@@ -17,6 +17,8 @@ public class SkuSubPriceGrowthRule : IFormulaRule
         var parent = skuSubNode.ParentNode;
         if (parent is null) return;
 
-        skuSubNode.PriceGrowth = (skuSubNode.PricePlanning - skuSubNode.PriceHistory) / parent.PricePlanning;
+        skuSubNode.PriceGrowth = parent.PricePlanning > 0
+            ? (skuSubNode.PricePlanning - skuSubNode.PriceHistory) / parent.PricePlanning
+            : default;
     }
 }

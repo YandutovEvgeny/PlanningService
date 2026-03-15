@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "PlanningDbContext": "DataSource=:memory:"
+  }
+}

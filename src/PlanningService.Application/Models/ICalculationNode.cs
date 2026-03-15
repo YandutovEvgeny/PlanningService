@@ -10,6 +10,4 @@ public interface ICalculationNode
     /// <b>Example</b>: Total, SKU, SKUSUB or etc.
     /// </summary>
     string Level { get; }
-
-
 }

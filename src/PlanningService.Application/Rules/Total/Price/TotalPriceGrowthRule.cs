@@ -14,6 +14,8 @@ public class TotalPriceGrowthRule : IFormulaRule
     {
         var totalNode = (TotalNode)node;
 
-        totalNode.PriceGrowth = (totalNode.PricePlanning - totalNode.PriceHistory) / totalNode.PriceHistory;
+        totalNode.PriceGrowth = totalNode.PriceHistory > 0
+            ? (totalNode.PricePlanning - totalNode.PriceHistory) / totalNode.PriceHistory
+            : default;
     }
 }

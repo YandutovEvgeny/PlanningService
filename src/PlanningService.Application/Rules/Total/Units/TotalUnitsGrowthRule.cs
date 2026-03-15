@@ -14,6 +14,8 @@ public class TotalUnitsGrowthRule : IFormulaRule
     {
         var totalNode = (TotalNode)node;
 
-        totalNode.UnitsGrowth = (totalNode.UnitsPlanning - totalNode.UnitsHistory) / totalNode.UnitsHistory;
+        totalNode.UnitsGrowth = totalNode.UnitsHistory > 0
+            ? (totalNode.UnitsPlanning - totalNode.UnitsHistory) / totalNode.UnitsHistory
+            : default;
     }
 }

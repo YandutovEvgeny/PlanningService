@@ -2,7 +2,7 @@
 
 public enum Column
 {
-    HistoryY0,
     PlanningY1,
+    HistoryY0,
     ContributionGrowth
 }
