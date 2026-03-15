@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace PlanningService.Domain.Entities;
@@ -8,25 +7,25 @@ namespace PlanningService.Domain.Entities;
 /// Represents the HistoryY0 table.<br/>
 /// Denotes data for the past period.
 /// </summary>
-[Table("HistoryY0")]
+[Table("historyY0")]
 public class HistoryY0 : EntityBase
 {
     /// <summary>
     /// Represents the SKUSub unique identifire.
     /// </summary>
-    [Column("SKUSubId")]
+    [Column("skusub_id")]
     public Guid SkuSubId { get; set; }
 
     /// <summary>
     /// Represents the SKUSub units.
     /// </summary>
-    [Column("Units")]
+    [Column("units")]
     public decimal Units { get; set; }
 
     /// <summary>
     /// Represents the SKUSub amount.
     /// </summary>
-    [Column("Amount")]
+    [Column("amount")]
     public decimal Amount { get; set; }
 
     /// <summary>

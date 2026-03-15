@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using PlanningService.Infrastructure.Options;
+using Microsoft.Extensions.Logging;
 
 namespace PlanningService.Infrastructure.Extensions;
 
@@ -13,13 +14,14 @@ public static class PlanningServiceDbContextExtensions
             .Configure(configure)
             .ValidateOnStart();
         
-        services.AddDbContext<PlanningDbContext>((sp, options) =>
+        services.AddDbContext<PlannerDbContext>((sp, options) =>
         {
             var dbContextOptions = sp.GetRequiredService<IOptions<PlanningServiceDbContextOptions>>();
 
-            options.UseInMemoryDatabase(dbContextOptions.Value.DatabaseName!);
+            options.UseSqlite(dbContextOptions.Value.Connection)
+                .LogTo(Console.WriteLine, LogLevel.Information)
+                .EnableSensitiveDataLogging();
             options.UseSnakeCaseNamingConvention();
-            options.EnableSensitiveDataLogging();
         });
 
         return services;

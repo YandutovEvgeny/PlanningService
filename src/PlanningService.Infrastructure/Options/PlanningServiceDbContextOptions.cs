@@ -1,10 +1,13 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Options;
 
 namespace PlanningService.Infrastructure.Options;
 
 public class PlanningServiceDbContextOptions : IValidateOptions<PlanningServiceDbContextOptions>
 {
     public string? DatabaseName { get; set; }
+
+    public required SqliteConnection Connection { get; set; }
 
     public ValidateOptionsResult Validate(string? name, PlanningServiceDbContextOptions options)
     {

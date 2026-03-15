@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using PlanningService.Application.Exceptions;
+using PlanningService.Infrastructure.Exceptions;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Mime;
 

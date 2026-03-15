@@ -7,37 +7,37 @@ namespace PlanningService.Domain.Entities;
 /// Represents the SKUSub table.<br/>
 /// Subordinate entity.
 /// </summary>
-[Table("SKUSub")]
+[Table("skusub")]
 public class SkuSub : EntityBase
 {
     /// <summary>
     /// Represents unique identifire of SKUSub.
     /// </summary>
-    [Column("SKUSubId")]
+    [Column("id")]
     public override Guid Id { get; set; }
 
     /// <summary>
     /// Represents the parent SKU identifire.
     /// </summary>
-    [Column("SKUId")]
+    [Column("sku_id")]
     public required Guid SkuId { get; set; }
 
     /// <summary>
     /// Represents the name of SKUSub.
     /// </summary>
-    [Column("SKUSubName")]
+    [Column("name")]
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Represents the SKU price.
     /// </summary>
-    [Column("SKUPRICE")]
+    [Column("sku_price")]
     public decimal Price { get; set; }
 
     /// <summary>
     /// Represents the SKU ratio.
     /// </summary>
-    [Column("SKURatio")]
+    [Column("sku_ratio")]
     public decimal Ratio { get; set; }
 
     /// <summary>
@@ -47,14 +47,14 @@ public class SkuSub : EntityBase
     public Sku Sku { get; set; }
 
     /// <summary>
-    /// Represents the child history members.
+    /// Represents the child history member.
     /// </summary>
     [AllowNull]
-    public ICollection<HistoryY0> HistoryMembers { get; set; }
+    public HistoryY0 HistoryMember { get; set; }
 
     /// <summary>
-    /// Represents the child planning members.
+    /// Represents the child planning member.
     /// </summary>
     [AllowNull]
-    public ICollection<PlanningY1> PlanningMembers { get; set; }
+    public PlanningY1 PlanningMember { get; set; }
 }

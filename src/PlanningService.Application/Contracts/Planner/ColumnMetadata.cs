@@ -9,6 +9,11 @@ namespace PlanningService.Application.Contracts.Planner;
 public class ColumnMetadata
 {
     /// <summary>
+    /// Represents the level of column.
+    /// </summary>
+    public string Level { get; set; } = string.Empty;
+
+    /// <summary>
     /// Represents the data type of column.
     /// </summary>
     public string DataType { get; set; } = string.Empty;

@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PlanningService.Domain.Entities;
 using PlanningService.Domain.Interfaces;
+using PlanningService.Infrastructure.Exceptions;
 
 namespace PlanningService.Infrastructure.Repositories;
 
 public class PlannerRepository : IPlannerRepository
 {
-    private readonly PlanningDbContext _context;
+    private readonly PlannerDbContext _context;
 
-    public PlannerRepository(PlanningDbContext context)
+    public PlannerRepository(PlannerDbContext context)
     {
         _context = context;
     }
@@ -16,6 +17,7 @@ public class PlannerRepository : IPlannerRepository
     public async Task<List<Sku>> GetAllSkusAsync(CancellationToken cancellationToken)
     {
         return await _context.Skus
+            .Include(s => s.SubItems)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
@@ -24,6 +26,8 @@ public class PlannerRepository : IPlannerRepository
     {
         return await _context.SkuSubs
             .Include(s => s.Sku)
+            .Include(s => s.HistoryMember)
+            .Include(s => s.PlanningMember)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
     }
@@ -44,24 +48,22 @@ public class PlannerRepository : IPlannerRepository
             .ToDictionaryAsync(p => p.SkuSubId, cancellationToken);
     }
 
-    public async Task UpdatePlanningAsync(Guid skuSubId, decimal newValue, CancellationToken cancellationToken)
+    public async Task<Guid> UpdatePlanningAsync(Guid skuSubId, decimal units, CancellationToken cancellationToken)
     {
-        var planning = await _context.PlanningY1Members.FindAsync([skuSubId], cancellationToken: cancellationToken);
-        var skuSub = await _context.SkuSubs.FindAsync([skuSubId], cancellationToken: cancellationToken)
-            ?? throw new ArgumentException("SkuSub not found");
+        var skuSub = await _context.SkuSubs
+            .Where(ss => ss.Id == skuSubId)
+            .Include(ss => ss.PlanningMember)
+            .SingleOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException($"Sku sub with id {skuSubId} not found");
 
-        if (planning is null)
+        if (skuSub.PlanningMember is not null)
         {
-            planning = new PlanningY1
-            {
-                SkuSubId = skuSubId
-            };
-            _context.PlanningY1Members.Add(planning);
+            skuSub.PlanningMember.Units = units;
+            skuSub.PlanningMember.Amount = units * skuSub.Price;
         }
 
-        planning.Units = newValue;
-        planning.Amount = newValue * skuSub.Price;
-
         await _context.SaveChangesAsync(cancellationToken);
+
+        return skuSub.Id;
     }
 }

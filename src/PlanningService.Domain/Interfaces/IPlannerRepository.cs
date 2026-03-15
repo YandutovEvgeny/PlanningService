@@ -8,5 +8,5 @@ public interface IPlannerRepository
     Task<List<SkuSub>> GetAllSkuSubsAsync(CancellationToken cancellationToken);
     Task<Dictionary<Guid, HistoryY0>> GetHistoryBySkuSubIdsAsync(IEnumerable<Guid> skuSubIds, CancellationToken cancellationToken);
     Task<Dictionary<Guid, PlanningY1>> GetPlanningBySkuSubIdsAsync(IEnumerable<Guid> skuSubIds, CancellationToken cancellationToken);
-    Task UpdatePlanningAsync(Guid skuSubId, decimal newValue, CancellationToken cancellationToken);
+    Task<Guid> UpdatePlanningAsync(Guid skuSubId, decimal units, CancellationToken cancellationToken);
 }

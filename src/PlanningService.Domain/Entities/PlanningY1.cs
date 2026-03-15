@@ -7,25 +7,25 @@ namespace PlanningService.Domain.Entities;
 /// Represents the PlanningY1 table.<br/>
 /// Data for current period.
 /// </summary>
-[Table("PlanningY1")]
+[Table("planningY1")]
 public class PlanningY1 : EntityBase
 {
     /// <summary>
     /// Represents the SKUSub unique identifire.
     /// </summary>
-    [Column("SKUSubId")]
+    [Column("skusub_id")]
     public Guid SkuSubId { get; set; }
 
     /// <summary>
     /// Represents the SKUSub units.
     /// </summary>
-    [Column("Units")]
+    [Column("units")]
     public decimal Units { get; set; }
 
     /// <summary>
     /// Represents the SKUSub amount.
     /// </summary>
-    [Column("Amount")]
+    [Column("amount")]
     public decimal Amount { get; set; }
 
     /// <summary>

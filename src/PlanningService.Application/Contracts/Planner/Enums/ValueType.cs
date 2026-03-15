@@ -2,7 +2,7 @@
 
 public enum ValueType
 {
-    UNITS,
     PRICE,
-    AMOUNT
+    AMOUNT,
+    UNITS
 }

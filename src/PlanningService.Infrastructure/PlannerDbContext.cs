@@ -4,20 +4,16 @@ using PlanningService.Infrastructure.Configurations;
 
 namespace PlanningService.Infrastructure;
 
-public class PlanningDbContext : DbContext
+public class PlannerDbContext : DbContext
 {
     public DbSet<Sku> Skus { get; set; }
     public DbSet<SkuSub> SkuSubs { get; set; }
     public DbSet<HistoryY0> HistoryY0Members { get; set; }
     public DbSet<PlanningY1> PlanningY1Members { get; set; }
 
-    public PlanningDbContext()
-    {
-    }
+    public PlannerDbContext() : base() { }
 
-    public PlanningDbContext(DbContextOptions<PlanningDbContext> options) : base(options)
-    {
-    }
+    public PlannerDbContext(DbContextOptions<PlannerDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
