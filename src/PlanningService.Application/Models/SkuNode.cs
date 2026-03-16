@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using PlanningService.Application.Contracts.Planner.Enums;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PlanningService.Application.Models;
 
@@ -8,17 +9,17 @@ namespace PlanningService.Application.Models;
 public class SkuNode : CalculationNodeBase
 {
     /// <inheritdoc/>
-    public override string Level => "SKU";
+    public override Level Level => Level.Sku;
 
     /// <summary>
     /// Represents unique identifire of SKU.
     /// </summary>
-    public Guid SkuId { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Represents the name of SKU.
     /// </summary>
-    public string SkuName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Represents the SKU's level childs.

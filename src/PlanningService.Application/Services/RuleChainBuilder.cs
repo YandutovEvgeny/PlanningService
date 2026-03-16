@@ -5,9 +5,9 @@ namespace PlanningService.Application.Services;
 
 public class RuleChainBuilder
 {
-    private readonly Dictionary<(string level, Column column), List<Type>> _chains = [];
+    private readonly Dictionary<(Level level, Column column), List<Type>> _chains = [];
 
-    public RuleChainBuilder For(string level, Column column)
+    public RuleChainBuilder For(Level level, Column column)
     {
         var key = (level, column);
         if (!_chains.ContainsKey(key))

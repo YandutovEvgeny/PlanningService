@@ -1,7 +1,6 @@
 ﻿using PlanningService.Application.Interfaces;
 using PlanningService.Application.Models;
-using PlanningService.Application.Contracts.Planner.Enums;
-using ValueType = PlanningService.Application.Contracts.Planner.Enums.ValueType;
+using Column = PlanningService.Application.Contracts.Planner.Enums.Column;
 
 namespace PlanningService.Application.Engine;
 
@@ -25,19 +24,16 @@ public class CalculationEngine : ICalculationEngine
     {
         var allNodes = GetAllNodes(context);
 
-        foreach(var node in allNodes)
+        foreach (var node in allNodes)
         {
             foreach (Column column in Enum.GetValues(typeof(Column)))
             {
-                foreach (ValueType type in Enum.GetValues(typeof(ValueType)))
+                var chain = _ruleChainProvider.GetRuleChain(node.Level, column);
+                foreach (var ruleType in chain)
                 {
-                    var chain = _ruleChainProvider.GetRuleChain(node.Level, column);
-                    foreach (var ruleType in chain)
+                    if (_rules.TryGetValue(ruleType, out var rule))
                     {
-                        if (_rules.TryGetValue(ruleType, out var rule) && rule.CanApply(node, type, column))
-                        {
-                            rule.Apply(node, type, context);
-                        }
+                        rule.Apply(node, context);
                     }
                 }
             }
@@ -46,14 +42,22 @@ public class CalculationEngine : ICalculationEngine
 
     private IEnumerable<ICalculationNode> GetAllNodes(ICalculationContext context)
     {
-        yield return context.Total!;
-        foreach (var sku in context.Skus)
+        foreach (var skuSub in context.SkuSubs)
         {
-            yield return sku;
-            foreach (var child in sku.Childrens)
+            yield return skuSub;
+        }
+
+        if (context.Skus.Any())
+        {
+            foreach (var sku in context.Skus)
             {
-                yield return child;
+                yield return sku;
             }
+        }
+
+        if (context.Total is not null)
+        {
+            yield return context.Total!;
         }
     }
 }

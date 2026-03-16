@@ -4,4 +4,5 @@ public interface ICalculationContext
 {
     TotalNode? Total { get; }
     IEnumerable<SkuNode> Skus { get; }
+    IEnumerable<SkuSubNode> SkuSubs { get; }
 }

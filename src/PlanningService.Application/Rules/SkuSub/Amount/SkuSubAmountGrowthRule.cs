@@ -10,7 +10,7 @@ public class SkuSubAmountGrowthRule : IFormulaRule
     public bool CanApply(ICalculationNode node, ValueType valueType, Column column)
         => node is SkuSubNode && valueType is ValueType.AMOUNT && column is Column.ContributionGrowth;
 
-    public void Apply(ICalculationNode node, ValueType valueType, ICalculationContext context)
+    public void Apply(ICalculationNode node, ICalculationContext context)
     {
         var skuSubNode = (SkuSubNode)node;
 

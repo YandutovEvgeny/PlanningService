@@ -1,4 +1,6 @@
-﻿namespace PlanningService.Application.Models;
+﻿using PlanningService.Application.Contracts.Planner.Enums;
+
+namespace PlanningService.Application.Models;
 
 /// <summary>
 /// Represents the calculation node.
@@ -9,5 +11,5 @@ public interface ICalculationNode
     /// Represents the node's level.<br/>
     /// <b>Example</b>: Total, SKU, SKUSUB or etc.
     /// </summary>
-    string Level { get; }
+    Level Level { get; }
 }

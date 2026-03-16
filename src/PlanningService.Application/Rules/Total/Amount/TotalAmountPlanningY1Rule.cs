@@ -10,7 +10,7 @@ public class TotalAmountPlanningY1Rule : IFormulaRule
     public bool CanApply(ICalculationNode node, ValueType valueType, Column column)
         => node is TotalNode && valueType is ValueType.AMOUNT && column is Column.PlanningY1;
 
-    public void Apply(ICalculationNode node, ValueType valueType, ICalculationContext context)
+    public void Apply(ICalculationNode node, ICalculationContext context)
     {
         var totalnode = (TotalNode)node;
 

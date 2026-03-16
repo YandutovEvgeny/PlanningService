@@ -1,4 +1,6 @@
-﻿namespace PlanningService.Application.Models;
+﻿using PlanningService.Application.Contracts.Planner.Enums;
+
+namespace PlanningService.Application.Models;
 
 /// <summary>
 /// Represents the total level calculated node.
@@ -6,5 +8,5 @@
 public class TotalNode : CalculationNodeBase
 {
     /// <inheritdoc/>
-    public override string Level => "Total";
+    public override Level Level => Level.Total;
 }
