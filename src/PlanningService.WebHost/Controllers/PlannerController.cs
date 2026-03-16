@@ -2,7 +2,6 @@
 using PlanningService.Application.Contracts;
 using PlanningService.Application.Contracts.Planner;
 using PlanningService.Application.Services.PlannerService;
-using PlanningService.WebHost.Contracts.Planner;
 
 namespace PlanningService.WebHost.Controllers;
 
@@ -30,7 +29,7 @@ public class PlannerController : ControllerBase
     {
         var filter = new PlannerFilter
         {
-            Levels = query.Levels,
+            Level = query.Level,
             SkuSubNames = query.SkuSubNames
         };
 
@@ -44,8 +43,8 @@ public class PlannerController : ControllerBase
     /// <param name="dto">Data for updating.</param>
     /// <returns>Updateing object identifire.</returns>
     [HttpPatch("{skuSubId:Guid}")]
-    public async Task<ResponseId<Guid>> UpdatePlanningModel([FromQuery] Guid skuSubId, [FromBody] UpdatePlanningDto dto)
+    public async Task<ResponseId<Guid>> UpdatePlanningModel([FromRoute] Guid skuSubId, [FromBody] UpdatePlanningDto dto)
     {
-       return await _plannerService.UpdatePlanningAsync(skuSubId, dto.Units);
+       return await _plannerService.UpdatePlanningAsync(skuSubId, dto);
     }
 }

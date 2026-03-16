@@ -1,4 +1,6 @@
-﻿namespace PlanningService.Application.Models;
+﻿using PlanningService.Application.Contracts.Planner.Enums;
+
+namespace PlanningService.Application.Models;
 
 /// <summary>
 /// Represents the SKUSUB level calculated node.
@@ -6,7 +8,7 @@
 public class SkuSubNode : CalculationNodeBase
 {
     /// <inheritdoc/>
-    public override string Level => "SKUSUB";
+    public override Level Level => Level.SkuSub;
 
     /// <summary>
     /// Represents the parent SKU node.
@@ -16,12 +18,12 @@ public class SkuSubNode : CalculationNodeBase
     /// <summary>
     /// Represents unique identifire of SKUSub.
     /// </summary>
-    public Guid SkuSubId { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Represents the name of SKUSub.
     /// </summary>
-    public string SkuSubName { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
     /// Represents the SKU price.

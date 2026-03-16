@@ -1,4 +1,6 @@
-﻿namespace PlanningService.Application.Models;
+﻿using PlanningService.Application.Contracts.Planner.Enums;
+
+namespace PlanningService.Application.Models;
 
 /// <summary>
 /// Abstract base class of calculation node.
@@ -6,7 +8,7 @@
 public abstract class CalculationNodeBase : ICalculationNode
 {
     /// <inheritdoc/>
-    public abstract string Level { get;}
+    public abstract Level Level { get;}
 
     /// <summary>
     /// Units history value.

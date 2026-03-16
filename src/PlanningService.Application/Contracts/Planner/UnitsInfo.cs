@@ -1,12 +1,10 @@
 ﻿using PlanningService.Application.Contracts.Planner.Enums;
-using ValueType = PlanningService.Application.Contracts.Planner.Enums.ValueType;
 
 namespace PlanningService.Application.Contracts.Planner;
 
-public class ValueInfo
+public record class UnitsInfo
 {
-    public ValueType Type { get; set; }
+    public Guid MetadataId { get; set; }
     public Column Column { get; set; }
-    public string Name { get; set; } = string.Empty;
     public decimal Value { get; set; }
 }

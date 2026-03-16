@@ -7,5 +7,5 @@ namespace PlanningService.Application.Interfaces;
 public interface IFormulaRule
 {
     bool CanApply(ICalculationNode node, ValueType valueType, Column column);
-    void Apply(ICalculationNode node, ValueType valueType, ICalculationContext context);
+    void Apply(ICalculationNode node, /*ValueType valueType,*/ ICalculationContext context);
 }

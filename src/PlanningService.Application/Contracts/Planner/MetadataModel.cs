@@ -3,15 +3,15 @@
 namespace PlanningService.Application.Contracts.Planner;
 
 /// <summary>
-/// Represents the column metdata.<br/>
+/// Represents the row metdata.<br/>
 /// Data types, titles, styles and etc.
 /// </summary>
-public class ColumnMetadata
+public class MetadataModel
 {
     /// <summary>
-    /// Represents the level of column.
+    /// Represents the 
     /// </summary>
-    public string Level { get; set; } = string.Empty;
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Represents the data type of column.

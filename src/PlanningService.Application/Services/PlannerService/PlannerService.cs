@@ -7,6 +7,7 @@ using PlanningService.Domain.Interfaces;
 using ValueType = PlanningService.Application.Contracts.Planner.Enums.ValueType;
 using Alignment = PlanningService.Application.Contracts.Planner.Enums.Alignment;
 using PlanningService.Application.Contracts;
+using PlanningService.Application.Contracts.Planner.Enums;
 
 namespace PlanningService.Application.Services.PlannerService;
 
@@ -20,7 +21,7 @@ public class PlannerService : IPlannerService
         IPlannerRepository plannerRepository,
         ICalculationEngine engine,
         ILogger<PlannerService> logger)
-    { 
+    {
         _plannerRepository = plannerRepository;
         _engine = engine;
         _logger = logger;
@@ -39,21 +40,33 @@ public class PlannerService : IPlannerService
             filteredSkuSubs = [.. skuSubs.Where(ss => filter.SkuSubNames.Contains(ss.Name))];
         }
 
-        var skuSubNodes = BuildSkuSubNodes(filteredSkuSubs, historyDictionary, planningDictionary);
-        var skuNodes = BuildSkuNodes(skus, skuSubNodes);
-        var totalNode = new TotalNode();
+        var skuSubNodes = new List<SkuSubNode>();
+        var skuNodes = new List<SkuNode>();
+        TotalNode? totalNode = null;
+
+        skuSubNodes = BuildSkuSubNodes(filteredSkuSubs, historyDictionary, planningDictionary);
+
+        if (filter.Level is Level.Sku)
+        {
+            skuNodes = BuildSkuNodes(skus, skuSubNodes);
+        }
+
+        if (filter.Level is Level.Total)
+        {
+            skuNodes = BuildSkuNodes(skus, skuSubNodes);
+            totalNode = new TotalNode();
+        }
 
         var context = new CalculationContext
         {
             Total = totalNode,
-            Skus = skuNodes
+            Skus = skuNodes,
+            SkuSubs = skuSubNodes
         };
 
         _engine.Calculate(context);
 
-        var rows = BuildPlannerRow(filter.Levels, totalNode, skuNodes, skuSubNodes);
-
-        var metadata = BuildColumnMetadata(rows);
+        (List<PlannerRow> rows, List<MetadataModel> metadata) = BuildPlannerRowsAndMetadata(filter.Level, totalNode, skuNodes, skuSubNodes);
 
         return new PlannerResponse
         {
@@ -62,9 +75,9 @@ public class PlannerService : IPlannerService
         };
     }
 
-    public async Task<ResponseId<Guid>> UpdatePlanningAsync(Guid skuSubId, decimal units, CancellationToken cancellationToken = default)
+    public async Task<ResponseId<Guid>> UpdatePlanningAsync(Guid skuSubId, UpdatePlanningDto data, CancellationToken cancellationToken = default)
     {
-        var result = await _plannerRepository.UpdatePlanningAsync(skuSubId, units, cancellationToken);
+        var result = await _plannerRepository.UpdatePlanningAsync(skuSubId, data.Units, cancellationToken);
 
         return new ResponseId<Guid>
         {
@@ -72,104 +85,263 @@ public class PlannerService : IPlannerService
         };
     }
 
-    private List<ColumnMetadata> BuildColumnMetadata(IEnumerable<PlannerRow> rows)
-    {
-        if (rows is null) return [];
-
-        var metadata = new List<ColumnMetadata>();
-
-        foreach (var row in rows)
-        {
-            metadata.Add(new ColumnMetadata
-            {
-                Level = row.Level,
-                DataType = "number",
-                Title = row.Title,
-                Style = Alignment.Center,
-                IsEditable = row.Level is "SkuSub" && row.ValueInfo.Name is "PlanningY1"
-            });
-        }
-
-        return metadata;
-    }
-
-    private List<PlannerRow> BuildPlannerRow(
-        string[]? levels,
-        TotalNode totalNode,
+    private (List<PlannerRow>, List<MetadataModel>) BuildPlannerRowsAndMetadata(
+        Level level,
+        TotalNode? totalNode,
         List<SkuNode> skuNodes,
         List<SkuSubNode> skuSubNodes)
     {
         var rows = new List<PlannerRow>();
+        var metadata = new List<MetadataModel>();
 
-        levels = levels?.Select(l => l.ToLower()).ToArray();
-
-        if (levels is null || levels.Contains("total"))
+        foreach (var skuSub in skuSubNodes)
         {
-            AddTotalRows(rows, totalNode);
+            FillSkuSubRowsAndMetadata(rows, metadata, skuSub);
         }
 
-        if (levels is null || levels.Contains("sku"))
+        if (level is Level.Sku)
         {
-            foreach (var sku in skuNodes.OrderBy(sku => sku.SkuName))
+            foreach (var sku in skuNodes)
             {
-                AddSkuRows(rows, sku);
+                FillSkuRowsAndMetadata(rows, metadata, sku);
             }
         }
 
-        if (levels is null || levels.Contains("skusub"))
+        if (level is Level.Total && totalNode is not null)
         {
-            foreach(var skuSub in skuSubNodes.OrderBy(ss => ss.ParentNode?.SkuName).ThenBy(ss => ss.SkuSubName))
+            foreach (var sku in skuNodes)
             {
-                AddSkuSubRows(rows, skuSub);
+                FillSkuRowsAndMetadata(rows, metadata, sku);
             }
+
+            FillTotalRowAndMetadata(rows, metadata, totalNode);
         }
 
-        return rows;
+        _logger.LogInformation("Planner rows and metadata with level:{Level} builded successfully", level);
+
+        return (rows, metadata);
     }
 
-    private void AddSkuSubRows(List<PlannerRow> rows, SkuSubNode node)
+    private void FillSkuSubRowsAndMetadata(List<PlannerRow> rows, List<MetadataModel> metadata, SkuSubNode node)
     {
-        var rowValueInfo = GetRowValueInfo(node);
+        var rowValueInfoDict = GetRowValueInfo(node)
+            .GroupBy(i => i.Type)
+            .ToDictionary(i => i.Key, i => i.ToList());
 
-        foreach(var valueInfo in rowValueInfo)
+        rows.Add(new PlannerRow
         {
-            rows.Add(new PlannerRow
+            Level = Level.SkuSub,
+            Title = node.Name,
+            ParentId = node.ParentNode?.Id ?? Guid.Empty,
+            UnitsInfos = rowValueInfoDict[ValueType.UNITS].Select(v =>
             {
-                Level = "SkuSub",
-                Title = node.SkuSubName,
-                ValueInfo = valueInfo
-            });
-        }
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = v.Column is Column.PlanningY1
+                });
+
+                return new UnitsInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList(),
+            PriceInfos = rowValueInfoDict[ValueType.PRICE].Select(v =>
+            {
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = v.Column is Column.PlanningY1
+                });
+
+                return new PriceInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList(),
+            AmountInfos = rowValueInfoDict[ValueType.AMOUNT].Select(v =>
+            {
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = v.Column is Column.PlanningY1
+                });
+
+                return new AmountInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList()
+        });
     }
 
-    private void AddSkuRows(List<PlannerRow> rows, SkuNode node)
+    private void FillSkuRowsAndMetadata(List<PlannerRow> rows, List<MetadataModel> metadata, SkuNode node)
     {
-        var rowValueInfo = GetRowValueInfo(node);
+        var rowValueInfoDict = GetRowValueInfo(node)
+            .GroupBy(v => v.Type)
+            .ToDictionary(v => v.Key, v => v.ToList());
 
-        foreach(var valueInfo in rowValueInfo)
+        rows.Add(new PlannerRow
         {
-            rows.Add(new PlannerRow
+            Level = Level.Sku,
+            Title = node.Name,
+            ParentId = Guid.Empty,
+            UnitsInfos = rowValueInfoDict[ValueType.UNITS].Select(v =>
             {
-                Level = "Sku",
-                Title = node.SkuName,
-                ValueInfo = valueInfo
-            });
-        }
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = false
+                });
+
+                return new UnitsInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList(),
+            PriceInfos = rowValueInfoDict[ValueType.PRICE].Select(v =>
+            {
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = false
+                });
+
+                return new PriceInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList(),
+            AmountInfos = rowValueInfoDict[ValueType.AMOUNT].Select(v =>
+            {
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = v.Column is Column.PlanningY1
+                });
+
+                return new AmountInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList()
+        });
     }
 
-    private void AddTotalRows(List<PlannerRow> rows, TotalNode node)
+    private void FillTotalRowAndMetadata(List<PlannerRow> rows, List<MetadataModel> metadata, TotalNode node)
     {
-        var rowValueInfo = GetRowValueInfo(node);
+        var rowValueInfo = GetRowValueInfo(node)
+            .GroupBy(v => v.Type)
+            .ToDictionary(v => v.Key, v => v.ToList());
 
-        foreach(var valueInfo in rowValueInfo)
+        rows.Add(new PlannerRow
         {
-            rows.Add(new PlannerRow
+            Level = Level.Total,
+            Title = "Total",
+            ParentId = Guid.Empty,
+            UnitsInfos = rowValueInfo[ValueType.UNITS].Select(v =>
             {
-                Level = "Total",
-                Title = "Total",
-                ValueInfo = valueInfo
-            });
-        }
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = false,
+                });
+
+                return new UnitsInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList(),
+            PriceInfos = rowValueInfo[ValueType.PRICE].Select(v =>
+            {
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = false
+                });
+
+                return new PriceInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList(),
+            AmountInfos = rowValueInfo[ValueType.AMOUNT].Select(v =>
+            {
+                var id = Guid.NewGuid();
+
+                metadata.Add(new MetadataModel
+                {
+                    Id = id,
+                    DataType = "number",
+                    Title = v.Name,
+                    Style = Alignment.Center,
+                    IsEditable = false
+                });
+
+                return new AmountInfo
+                {
+                    MetadataId = id,
+                    Column = v.Column,
+                    Value = v.Value
+                };
+            }).ToList()
+        });
     }
 
     private List<SkuSubNode> BuildSkuSubNodes(
@@ -179,7 +351,7 @@ public class PlannerService : IPlannerService
     {
         var result = new List<SkuSubNode>();
 
-        foreach(var skuSub in skuSubs)
+        foreach (var skuSub in skuSubs)
         {
             var history = historyDictionary.GetValueOrDefault(skuSub.Id) ?? new HistoryY0 { Amount = 0m, Units = 0m };
             var planning = planningDictionary.GetValueOrDefault(skuSub.Id) ?? new PlanningY1 { Amount = 0m, Units = 0m };
@@ -188,11 +360,11 @@ public class PlannerService : IPlannerService
             {
                 ParentNode = new SkuNode
                 {
-                    SkuId = skuSub.SkuId,
-                    SkuName = skuSub.Sku.Name
+                    Id = skuSub.SkuId,
+                    Name = skuSub.Sku.Name
                 },
-                SkuSubId = skuSub.Id,
-                SkuSubName = skuSub.Name,
+                Id = skuSub.Id,
+                Name = skuSub.Name,
                 Ratio = skuSub.Ratio,
                 UnitsHistory = history.Units,
                 UnitsPlanning = planning.Units,
@@ -209,7 +381,7 @@ public class PlannerService : IPlannerService
     {
         var skuNodes = new List<SkuNode>();
         var skuSubDictionary = skuSubNodes
-            .GroupBy(ss => ss.ParentNode.SkuId)
+            .GroupBy(ss => ss.ParentNode.Id)
             .ToDictionary(g => g.Key, g => g.ToList());
 
         foreach (var sku in skus)
@@ -220,8 +392,8 @@ public class PlannerService : IPlannerService
 
             var skuNode = new SkuNode
             {
-                SkuId = sku.Id,
-                SkuName = sku.Name,
+                Id = sku.Id,
+                Name = sku.Name,
                 Childrens = childs
             };
 
@@ -253,24 +425,21 @@ public class PlannerService : IPlannerService
 
         var result = new List<ValueInfo>();
 
-        foreach(var (name, getter) in propertyGetters)
+        foreach (var (name, getter) in propertyGetters)
         {
-            var valueType = ValueType.UNITS;
-
-            if (name.StartsWith("Price"))
-            {
-                valueType = ValueType.PRICE;
-            }
-
-            if (name.StartsWith("Amount"))
-            {
-                valueType = ValueType.AMOUNT;
-            }
-
             result.Add(new ValueInfo
             {
                 Name = name,
-                Type = valueType,
+                Type = name.StartsWith("Price")
+                    ? ValueType.PRICE
+                    : name.StartsWith("Amount")
+                        ? ValueType.AMOUNT
+                        : ValueType.UNITS,
+                Column = name.EndsWith("Planning")
+                    ? Column.PlanningY1
+                    : name.EndsWith("Growth")
+                        ? Column.ContributionGrowth
+                        : Column.HistoryY0,
                 Value = getter(node)
             });
         }

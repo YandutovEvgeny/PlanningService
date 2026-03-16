@@ -10,7 +10,7 @@ public class SkuUnitsPlanningY1Rule : IFormulaRule
     public bool CanApply(ICalculationNode node, ValueType valueType, Column column)
         => node is SkuNode && valueType is ValueType.UNITS && column is Column.PlanningY1;
 
-    public void Apply(ICalculationNode node, ValueType valueType, ICalculationContext context)
+    public void Apply(ICalculationNode node, ICalculationContext context)
     {
         var skuNode = (SkuNode)node;
 
