@@ -4,6 +4,7 @@ namespace PlanningService.Application.Contracts.Planner;
 
 public record class PlannerRow
 {
+    public Guid Id { get; set; }
     public Guid ParentId { get; set; }
     public Level Level { get; set; }
     public string Title { get; set; } = string.Empty;
