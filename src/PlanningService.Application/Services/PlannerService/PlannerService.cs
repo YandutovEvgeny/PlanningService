@@ -130,6 +130,7 @@ public class PlannerService : IPlannerService
 
         rows.Add(new PlannerRow
         {
+            Id = Guid.NewGuid(),
             Level = Level.SkuSub,
             Title = node.Name,
             ParentId = node.ParentNode?.Id ?? Guid.Empty,
@@ -204,6 +205,7 @@ public class PlannerService : IPlannerService
 
         rows.Add(new PlannerRow
         {
+            Id = Guid.NewGuid(),
             Level = Level.Sku,
             Title = node.Name,
             ParentId = Guid.Empty,
@@ -278,6 +280,7 @@ public class PlannerService : IPlannerService
 
         rows.Add(new PlannerRow
         {
+            Id = Guid.NewGuid(),
             Level = Level.Total,
             Title = "Total",
             ParentId = Guid.Empty,
